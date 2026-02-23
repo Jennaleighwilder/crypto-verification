@@ -1,6 +1,8 @@
 """
 Institutional test battery — numbers only.
 Tests 1–3: Walk-forward correlation, decile monotonicity, CTR.
+
+STRICT tests: equal deciles, no smoothing, no alternation, no bin tricks.
 """
 import sys
 import os
@@ -14,11 +16,81 @@ from engine.ramanash_beast import beast_from_market
 try:
     import numpy as np
     from scipy import stats
-    from scipy.stats import spearmanr
+    from scipy.stats import pearsonr
 except ImportError:
     np = None
     stats = None
-    spearmanr = None
+    pearsonr = None
+
+
+# --- STRICT TEST 1 — WALK-FORWARD CORRELATION ---
+def strict_test1_correlation(f_series, future_vol):
+    f = np.array(f_series)
+    v = np.array(future_vol)
+
+    mask = ~np.isnan(f) & ~np.isnan(v)
+    f = f[mask]
+    v = v[mask]
+
+    r, p = pearsonr(f, v)
+
+    print("Correlation:", round(r, 4))
+    print("p-value:", p)
+
+    passed = (r > 0.2) and (p < 0.05)
+    print("Pass:", passed)
+
+    return r, p, passed
+
+
+# --- STRICT TEST 2 — EQUAL DECILE MONOTONICITY ---
+def strict_test2_monotonicity(f_series, future_vol):
+    f = np.array(f_series)
+    v = np.array(future_vol)
+
+    mask = ~np.isnan(f) & ~np.isnan(v)
+    f = f[mask]
+    v = v[mask]
+
+    deciles = np.percentile(f, np.arange(0, 110, 10))
+
+    means = []
+    for i in range(10):
+        if i < 9:
+            bucket = v[(f >= deciles[i]) & (f < deciles[i+1])]
+        else:
+            bucket = v[(f >= deciles[i]) & (f <= deciles[i+1])]
+        means.append(np.mean(bucket))
+
+    monotonic = sum(
+        1 for i in range(9)
+        if means[i+1] > means[i]
+    ) / 9
+
+    print("Monotonicity:", round(monotonic, 4))
+    print("Pass:", monotonic >= 0.8)
+
+    return monotonic, monotonic >= 0.8
+
+
+# --- STRICT TEST 3 — TRUE CTR (NO PERCENTILE FALLBACK) ---
+def strict_test3_ctr(f_series, future_vol):
+    f = np.array(f_series)
+    v = np.array(future_vol)
+
+    high = v[f < -0.8]
+    low  = v[f > -0.2]
+
+    if len(high) < 10 or len(low) < 10:
+        print("Insufficient tail samples.")
+        return None, False
+
+    ctr = np.mean(high) / np.mean(low)
+
+    print("CTR:", round(ctr, 4))
+    print("Pass:", ctr > 1.5)
+
+    return ctr, ctr > 1.5
 
 
 def _load_data():
@@ -126,32 +198,48 @@ def test3_ctr():
     return None, False
 
 
+def _generate_f_and_future_vol():
+    """Generate f_series (F_t) and future_vol (t+1 → t+7 realized vol)."""
+    prices, vols = _load_data()
+    macro = {"media_sentiment": -0.5, "spending_habits": 0.5, "war_conflict": 0.5, "materials_avail": 0.5}
+    steps = beast_from_market(prices, vols, macro)
+    future_vols = []
+    for t in range(len(steps)):
+        i = 20 + 30 + t
+        if i + 8 < len(vols):
+            future_vols.append(np.mean(vols[i + 1 : i + 8]))
+        else:
+            future_vols.append(vols[-1])
+    n = min(len(steps), len(future_vols))
+    f_series = np.array([s["crisis_field"] for s in steps[:n]])
+    future_vol = np.array(future_vols[:n])
+    return f_series, future_vol
+
+
 def main():
-    print("TEST 1 — Walk-Forward Correlation")
-    r, p, pass1 = test1_walk_forward_correlation()
-    print(f"  corr(F_t, future_vol) = {r:.4f}")
-    print(f"  p-value = {p:.6f}")
-    print(f"  Pass (r>0.2, p<0.05): {pass1}")
+    f_series, future_vol = _generate_f_and_future_vol()
 
-    print("\nTEST 2 — Decile Monotonicity")
-    M, pass2 = test2_decile_monotonicity()
-    print(f"  Monotonicity = {M:.4f}")
-    print(f"  Pass (M>=0.8): {pass2}")
+    print("--- STRICT TEST 1 ---")
+    r, p, _ = strict_test1_correlation(f_series, future_vol)
 
-    print("\nTEST 3 — Convex Tail Capture Ratio")
-    ctr, pass3 = test3_ctr()
-    if ctr is not None:
-        print(f"  CTR = {ctr:.4f}")
-        print(f"  Pass (CTR>1.5): {pass3}")
-    else:
-        print(f"  CTR: N/A (insufficient F<-0.8 samples)")
-        print(f"  Pass: N/A")
+    print("\n--- STRICT TEST 2 ---")
+    monotonic, _ = strict_test2_monotonicity(f_series, future_vol)
 
-    print("\n--- NUMBERS ONLY ---")
-    print(f"Correlation: {r:.4f}")
-    print(f"p-value: {p:.6f}")
-    print(f"Monotonicity: {M:.4f}")
-    print(f"CTR: {ctr if ctr is not None else 'N/A'}")
+    print("\n--- STRICT TEST 3 ---")
+    f = np.array(f_series)
+    v = np.array(future_vol)
+    mask = ~np.isnan(f) & ~np.isnan(v)
+    f, v = f[mask], v[mask]
+    n_high = np.sum(f < -0.8)
+    n_low = np.sum(f > -0.2)
+    ctr, _ = strict_test3_ctr(f_series, future_vol)
+
+    print("\n--- OUTPUT ---")
+    print("Correlation:", round(r, 4))
+    print("p-value:", p)
+    print("Monotonicity:", round(monotonic, 4))
+    print("CTR:", round(ctr, 4) if ctr is not None else "N/A")
+    print("Tail sample counts: F<-0.8:", n_high, "| F>-0.2:", n_low)
 
 
 if __name__ == "__main__":
