@@ -14,18 +14,17 @@ sys.path.insert(0, str(_root))
 import logging
 from flask import Flask, jsonify, request, send_from_directory
 
-from engine.verifier import verifier
-
 logger = logging.getLogger(__name__)
 
-try:
-    from engine.ramanash_kernel import MACRO_FEB_23_2026
-    RAMANASH_AVAILABLE = True
-except ImportError:
-    MACRO_FEB_23_2026 = None
-    RAMANASH_AVAILABLE = False
-
 app = Flask(__name__, static_folder=_root / 'public', static_url_path='')
+
+
+def _get_macro_fallback():
+    try:
+        from engine.ramanash_kernel import MACRO_FEB_23_2026
+        return MACRO_FEB_23_2026, True
+    except Exception:
+        return None, False
 
 
 @app.route("/")
@@ -58,10 +57,12 @@ def verify():
     if len(str(address)) > 1000:
         return jsonify({"error": "Address too long"}), 400
 
-    if macro_factors is None and RAMANASH_AVAILABLE:
-        macro_factors = MACRO_FEB_23_2026
-        logger.info("[AUTO-MACRO] Using MACRO_FEB_23_2026")
+    if macro_factors is None:
+        macro_factors, ramanash_ok = _get_macro_fallback()
+        if ramanash_ok:
+            logger.info("[AUTO-MACRO] Using MACRO_FEB_23_2026")
 
+    from engine.verifier import verifier
     result = verifier.verify_address(address, macro_factors=macro_factors)
     return jsonify(result)
 
