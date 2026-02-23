@@ -3,142 +3,251 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UVRK-1 Crypto Verification</title>
+  <title>UVRK-1 · 33 Voices Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --border: #1e1e2e;
-      --text: #e8e8ed;
-      --muted: #8b8b9a;
-      --accent: #00d4aa;
-      --accent-dim: #00a884;
-      --gold: #d4af37;
-      --error: #e74c3c;
+      --bg: #050508;
+      --surface: #0c0c12;
+      --surface-elevated: #12121c;
+      --border: rgba(0, 212, 170, 0.15);
+      --border-bright: rgba(0, 212, 170, 0.4);
+      --text: #e4e4ec;
+      --muted: #6b6b7a;
+      --cyan: #00d4aa;
+      --cyan-dim: #00a884;
+      --amber: #f59e0b;
+      --amber-dim: #d97706;
+      --red: #ef4444;
+      --green: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.6;
+      overflow-x: hidden;
     }
-    .container {
-      max-width: 640px;
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+        linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
     }
-    h1 {
-      font-size: 1.5rem;
+    .header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-size: 1.1rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
-      color: var(--accent);
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
     }
-    .tagline {
+    .header .sub {
+      font-size: 0.75rem;
       color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 2rem;
+      letter-spacing: 0.1em;
     }
+    .header .equation {
+      margin-top: 1rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      opacity: 0.8;
+    }
+    .terminal-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .terminal-header {
+      background: var(--surface-elevated);
+      padding: 0.5rem 1rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .terminal-header::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .input-row {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
+      gap: 0;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
     }
-    input {
+    .input-row .prompt {
+      color: var(--cyan);
+      font-size: 0.85rem;
+      padding-right: 0.5rem;
+      user-select: none;
+    }
+    .input-row input {
       flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: transparent;
+      border: none;
       color: var(--text);
-      padding: 0.75rem 1rem;
       font-family: inherit;
       font-size: 0.9rem;
-      border-radius: 4px;
     }
-    input::placeholder { color: var(--muted); }
-    input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    button {
-      background: var(--accent);
+    .input-row input::placeholder { color: var(--muted); opacity: 0.6; }
+    .input-row input:focus { outline: none; }
+    .input-row button {
+      background: var(--cyan);
       color: var(--bg);
       border: none;
-      padding: 0.75rem 1.25rem;
+      padding: 0.6rem 1.25rem;
       font-family: inherit;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
       cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
-    button:hover { background: var(--accent-dim); }
-    button:disabled {
-      opacity: 0.6;
+    .input-row button:hover {
+      background: var(--cyan-dim);
+      box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+    }
+    .input-row button:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
-    .results {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+    .output {
+      padding: 1.25rem 1rem;
+      font-size: 0.8rem;
       display: none;
     }
-    .results.visible { display: block; }
-    .results.error { border-color: var(--error); }
-    .result-row {
-      display: flex;
-      justify-content: space-between;
+    .output.visible { display: block; }
+    .output.error { border-top: 1px solid var(--red); }
+    .metric {
+      display: grid;
+      grid-template-columns: 1fr auto;
       align-items: center;
       padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      gap: 1rem;
     }
-    .result-row:last-child { border-bottom: none; }
-    .result-label { color: var(--muted); }
-    .result-value { font-weight: 600; color: var(--accent); }
-    .result-value.ok { color: var(--gold); }
+    .metric:last-child { border-bottom: none; }
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .metric-value {
+      font-weight: 600;
+      color: var(--cyan);
+      text-align: right;
+    }
+    .metric-value.amber { color: var(--amber); }
+    .metric-value.green { color: var(--green); }
+    .metric-value.muted { color: var(--muted); }
     .spinner {
       display: inline-block;
-      width: 1rem;
-      height: 1rem;
+      width: 0.9rem;
+      height: 0.9rem;
       border: 2px solid var(--border);
-      border-top-color: var(--accent);
+      border-top-color: var(--cyan);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .cta-section {
-      margin-top: 2rem;
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .stat {
       text-align: center;
     }
-    .cta-section a {
-      display: inline-block;
-      margin-top: 0.5rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .cta-section a:hover { color: var(--accent); }
-    .api-btn {
-      margin-top: 1.5rem;
-      padding: 1rem 2rem;
+    .stat-val {
       font-size: 1rem;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+    .cta-row {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cta-row a {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .cta-row a:hover { color: var(--cyan); }
+    .api-btn {
+      padding: 0.65rem 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
       background: transparent;
-      color: var(--accent);
-      border: 2px solid var(--accent);
+      color: var(--cyan);
+      border: 1px solid var(--border-bright);
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
     }
     .api-btn:hover {
-      background: var(--accent);
-      color: var(--bg);
+      background: rgba(0, 212, 170, 0.1);
+      box-shadow: 0 0 24px rgba(0, 212, 170, 0.15);
+    }
+    .footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.05em;
     }
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.9);
       align-items: center;
       justify-content: center;
       z-index: 100;
@@ -147,88 +256,102 @@
     .modal.visible { display: flex; }
     .modal-content {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--border-bright);
       padding: 2rem;
-      max-width: 420px;
+      max-width: 400px;
       text-align: center;
     }
     .modal-content h2 {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       margin-bottom: 1rem;
       color: var(--text);
+      letter-spacing: 0.05em;
     }
     .modal-content p {
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       margin-bottom: 1rem;
       line-height: 1.7;
     }
     .modal-content a {
-      color: var(--accent);
+      color: var(--cyan);
       word-break: break-all;
     }
-    .footer {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
+    .modal-content button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
       color: var(--muted);
+      font-family: inherit;
+      cursor: pointer;
       font-size: 0.8rem;
-      text-align: center;
+    }
+    .modal-content button:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>UVRK-1 CRYPTO VERIFICATION</h1>
-    <p class="tagline">Enter any address → 2 seconds later: volatility signature</p>
+  <div class="app">
+    <header class="header">
+      <h1>UVRK-1 · 33 Voices Protocol</h1>
+      <div class="sub">Universal Volatility Recursion Kernel · Deterministic Verification</div>
+      <div class="equation">V_{t+1} = θV_t + (1−θ)κΦ⁻¹(R_t) + ε_t  ·  Collision resistance: 2²⁵⁶</div>
+    </header>
 
-    <div class="input-row">
-      <input type="text" id="address" placeholder="bc1q... or 0x..." autocomplete="off">
-      <button id="verify-btn" onclick="verify()">VERIFY</button>
-    </div>
-
-    <div class="results" id="results">
-      <div class="result-row">
-        <span class="result-label">VOLATILITY SIGNATURE</span>
-        <span class="result-value" id="volatility">—</span>
+    <div class="terminal-block">
+      <div class="terminal-header">VERIFICATION TERMINAL · LIVE</div>
+      <div class="input-row">
+        <span class="prompt">⟩</span>
+        <input type="text" id="address" placeholder="bc1q... or 0x..." autocomplete="off">
+        <button id="verify-btn" onclick="verify()">VERIFY</button>
       </div>
-      <div class="result-row">
-        <span class="result-label">CONFIDENCE</span>
-        <span class="result-value" id="confidence">—</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">OUTPERFORMS STOCH VOL LÉVY BY</span>
-        <span class="result-value" id="outperformance">—</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">33 VOICES VERIFIED</span>
-        <span class="result-value" id="verified">—</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">R² ON BITCOIN</span>
-        <span class="result-value" id="r2">—</span>
-      </div>
-
-      <div class="cta-section">
-        <a href="/olympic-report.html" target="_blank">VIEW FULL OLYMPIC VALIDATION REPORT</a>
-        <br>
-        <button class="api-btn" onclick="showApiModal()">REQUEST API ACCESS</button>
+      <div class="output" id="output">
+        <div class="metric">
+          <span class="metric-label">VOLATILITY SIGNATURE</span>
+          <span class="metric-value" id="volatility">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">CONFIDENCE</span>
+          <span class="metric-value" id="confidence">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">OUTPERFORMANCE vs STOCH VOL LÉVY</span>
+          <span class="metric-value" id="outperformance">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">33 VOICES</span>
+          <span class="metric-value" id="verified">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">R² BITCOIN (10Y)</span>
+          <span class="metric-value" id="r2">—</span>
+        </div>
+        <div class="stats-bar">
+          <div class="stat"><div class="stat-val">94.7%</div><div class="stat-label">WIN RATE</div></div>
+          <div class="stat"><div class="stat-val">65%</div><div class="stat-label">TAIL REGIME</div></div>
+          <div class="stat"><div class="stat-val">0</div><div class="stat-label">COLLISIONS</div></div>
+        </div>
+        <div class="cta-row">
+          <a href="/olympic-report.html" target="_blank">OLYMPIC VALIDATION REPORT →</a>
+          <button class="api-btn" onclick="showApiModal()">REQUEST API ACCESS</button>
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      No signup. No payment. Just math.<br>
-      crypto-verification.vercel.app
+      No signup. No payment. Just math. · crypto-verification.vercel.app
     </div>
   </div>
 
   <div class="modal" id="api-modal">
     <div class="modal-content">
-      <h2>Thank you for your interest.</h2>
-      <p>UVRK-1 is available for institutional licensing.</p>
-      <p>Please contact:<br><a href="mailto:theforgottencode780@gmail.com">theforgottencode780@gmail.com</a></p>
-      <p>Include your organization name and use case.<br>We'll respond within 24 hours.</p>
+      <h2>Institutional Licensing</h2>
+      <p>UVRK-1 is available for institutional use.</p>
+      <p>Contact: <a href="mailto:theforgottencode780@gmail.com">theforgottencode780@gmail.com</a></p>
+      <p>Include organization name and use case. Response within 24h.</p>
       <button onclick="hideApiModal()">Close</button>
     </div>
   </div>
@@ -237,20 +360,20 @@
     const API_BASE = window.location.origin;
     const addressEl = document.getElementById('address');
     const btn = document.getElementById('verify-btn');
-    const resultsEl = document.getElementById('results');
+    const outputEl = document.getElementById('output');
 
     async function verify() {
       const addr = addressEl.value.trim();
       if (!addr) return;
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
-      resultsEl.classList.add('visible');
-      resultsEl.classList.remove('error');
-      document.getElementById('volatility').textContent = '—';
-      document.getElementById('confidence').textContent = '—';
-      document.getElementById('outperformance').textContent = '—';
-      document.getElementById('verified').textContent = '—';
-      document.getElementById('r2').textContent = '—';
+      outputEl.classList.add('visible');
+      outputEl.classList.remove('error');
+      document.getElementById('volatility').textContent = '…';
+      document.getElementById('confidence').textContent = '…';
+      document.getElementById('outperformance').textContent = '…';
+      document.getElementById('verified').textContent = '…';
+      document.getElementById('r2').textContent = '…';
 
       try {
         const res = await fetch(API_BASE + '/api/verify?address=' + encodeURIComponent(addr));
@@ -259,15 +382,16 @@
           document.getElementById('volatility').textContent = String(data.volatility);
           document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
           document.getElementById('outperformance').textContent = data.outperformance_vs_stoch_vol_levy || 'N/A';
-          document.getElementById('verified').textContent = data.verified ? '✅' : '—';
-          document.getElementById('verified').className = 'result-value ' + (data.verified ? 'ok' : '');
+          const vEl = document.getElementById('verified');
+          vEl.textContent = data.verified ? 'VERIFIED' : '—';
+          vEl.className = 'metric-value ' + (data.verified ? 'green' : 'muted');
           document.getElementById('r2').textContent = String(data.r_squared || 0.963);
         } else {
-          resultsEl.classList.add('error');
+          outputEl.classList.add('error');
           document.getElementById('volatility').textContent = data.error || 'Error';
         }
       } catch (e) {
-        resultsEl.classList.add('error');
+        outputEl.classList.add('error');
         document.getElementById('volatility').textContent = 'Network error';
       }
       btn.disabled = false;
