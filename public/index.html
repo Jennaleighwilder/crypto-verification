@@ -20,7 +20,7 @@
     html, body { height: 100%; overflow: hidden; }
     body {
       font-family: 'JetBrains Mono', monospace;
-      background: var(--bg-dark);
+      background: radial-gradient(ellipse at 50% 50%, #0a1520 0%, #050a0f 50%, #020508 100%);
       color: var(--neon-cyan);
       position: relative;
     }
@@ -47,7 +47,7 @@
       width: 100%;
       height: 100%;
       z-index: 0;
-      opacity: 0.25;
+      opacity: 0.4;
     }
     .war-room {
       position: relative;
@@ -106,20 +106,22 @@
     .voice-hex {
       aspect-ratio: 1;
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      background: #1a1a1a;
-      border: 2px solid #333;
+      background: linear-gradient(145deg, #1a2530 0%, #0f1419 100%);
+      border: 2px solid rgba(0,242,255,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.8rem;
       font-weight: 800;
-      color: #333;
+      color: rgba(0,242,255,0.4);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: inset 0 0 10px rgba(0,242,255,0.03);
     }
     .voice-hex.ping {
-      border-color: rgba(0,242,255,0.8);
-      box-shadow: 0 0 20px rgba(0,242,255,0.5), inset 0 0 15px rgba(0,242,255,0.2);
-      background: linear-gradient(135deg, #0a2a2a 0%, #1a1a1a 100%);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 25px rgba(0,242,255,0.7), 0 0 40px rgba(0,242,255,0.3), inset 0 0 20px rgba(0,242,255,0.15);
+      background: linear-gradient(135deg, #0a3540 0%, #1a2530 100%);
+      color: rgba(0,242,255,0.9);
     }
     .voice-hex.active {
       background: var(--neon-cyan);
@@ -181,6 +183,14 @@
       align-items: center;
       justify-content: center;
       min-height: 0;
+      position: relative;
+    }
+    .sigma-board::before {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(ellipse at center, rgba(0,242,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
     .sigma-pulse {
       font-size: clamp(5rem, 18vw, 14rem);
@@ -189,6 +199,15 @@
       color: var(--neon-cyan);
       text-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan), 0 0 90px rgba(0,242,255,0.5);
       animation: sigmaPulse 1.5s ease-in-out infinite alternate;
+    }
+    .sigma-pulse.idle {
+      color: rgba(0,242,255,0.6);
+      text-shadow: 0 0 20px rgba(0,242,255,0.4);
+      animation: sigmaIdle 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes sigmaIdle {
+      from { opacity: 0.85; }
+      to { opacity: 1; }
     }
     @keyframes sigmaPulse {
       from { opacity: 0.9; text-shadow: 0 0 25px var(--neon-cyan), 0 0 50px var(--neon-cyan); }
@@ -211,6 +230,18 @@
       margin-top: 0.75rem;
     }
     .metrics-row span { color: rgba(0,242,255,0.95); text-shadow: 0 0 8px rgba(0,242,255,0.3); }
+    .cta-hint {
+      font-size: 0.95rem;
+      color: var(--neon-amber);
+      margin-top: 0.5rem;
+      opacity: 0.9;
+      animation: ctaPulse 2s ease-in-out infinite;
+    }
+    @keyframes ctaPulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    .cta-hint.hidden { display: none; }
     .right-rail {
       border-left: 2px solid rgba(0,242,255,0.4);
       padding: 1rem;
@@ -399,13 +430,14 @@
         <button id="demo-btn" onclick="runDemo()" class="demo-btn">DEMO</button>
       </div>
       <div class="sigma-board">
-        <div class="sigma-pulse" id="sigma-display">—</div>
-        <div class="sigma-label" id="sigma-label">OUTPERFORMANCE vs STOCH VOL LÉVY</div>
+        <div class="sigma-pulse idle" id="sigma-display">+8.71σ</div>
+        <div class="sigma-label" id="sigma-label">OUTPERFORMANCE vs STOCH VOL LÉVY · ENTER ADDRESS TO VERIFY</div>
         <div class="metrics-row">
           <span id="vol-display">VOL: —</span>
           <span id="conf-display">CONF: —</span>
           <span id="r2-display">R²: 0.963</span>
         </div>
+        <div class="cta-hint" id="cta-hint">Click DEMO or enter address + VERIFY</div>
       </div>
     </div>
 
@@ -509,10 +541,12 @@
       btn.disabled = true;
       resetVoices();
       sigmaDisplay.textContent = '…';
+      sigmaDisplay.classList.add('idle');
       volDisplay.textContent = 'VOL: —';
       confDisplay.textContent = 'CONF: —';
       voicesStatus.textContent = 'Harmonizing deterministic input...';
       document.body.classList.remove('regime-tail-event');
+      document.getElementById('cta-hint').classList.add('hidden');
 
       log('[UVRK-1] Calculating Probit Rank...');
       log('[VOICES] Harmonizing deterministic input...');
@@ -527,6 +561,7 @@
           log('[SYSTEM] VERIFICATION SUCCESS', 'ok');
 
           sigmaDisplay.textContent = data.outperformance_vs_stoch_vol_levy || 'N/A';
+          sigmaDisplay.classList.remove('idle');
           volDisplay.textContent = 'VOL: ' + data.volatility;
           confDisplay.textContent = 'CONF: ' + (data.confidence * 100).toFixed(1) + '%';
 
@@ -540,12 +575,16 @@
         } else {
           log('[ERROR] ' + (data.error || 'Unknown'), 'err');
           sigmaDisplay.textContent = 'ERR';
+          sigmaDisplay.classList.remove('idle');
           resetVoices();
+          document.getElementById('cta-hint').classList.remove('hidden');
         }
       } catch (e) {
         log('[ERROR] Network failure', 'err');
         sigmaDisplay.textContent = 'ERR';
+        sigmaDisplay.classList.remove('idle');
         resetVoices();
+        document.getElementById('cta-hint').classList.remove('hidden');
       }
       btn.disabled = false;
       idleDemoActive = true;
@@ -581,7 +620,7 @@
       for (let i = 0; i < cols; i++) {
         const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 64));
         const x = i * 22;
-        const alpha = 0.15 + Math.random() * 0.25;
+        const alpha = 0.25 + Math.random() * 0.35;
         ctx.fillStyle = isTail ? `rgba(255,0,60,${alpha})` : `rgba(0,242,255,${alpha})`;
         ctx.fillText(char, x, ypos[i]);
         if (ypos[i] > h && Math.random() > 0.97) ypos[i] = 0;
@@ -602,10 +641,13 @@
         if (!idleDemoActive) return;
         const hexes = document.querySelectorAll('.voice-hex:not(.active)');
         if (hexes.length === 0) return;
-        const randomHex = hexes[Math.floor(Math.random() * hexes.length)];
-        randomHex.classList.add('ping');
-        setTimeout(() => randomHex.classList.remove('ping'), 400);
-      }, 800);
+        const n = Math.min(3, hexes.length);
+        for (let i = 0; i < n; i++) {
+          const randomHex = hexes[Math.floor(Math.random() * hexes.length)];
+          randomHex.classList.add('ping');
+          setTimeout(() => randomHex.classList.remove('ping'), 600);
+        }
+      }, 600);
     }
 
     function stopIdleDemo() {
@@ -620,10 +662,12 @@
       document.getElementById('demo-btn').disabled = true;
       resetVoices();
       sigmaDisplay.textContent = '…';
+      sigmaDisplay.classList.add('idle');
       volDisplay.textContent = 'VOL: —';
       confDisplay.textContent = 'CONF: —';
       voicesStatus.textContent = 'Harmonizing deterministic input...';
       document.body.classList.remove('regime-tail-event');
+      document.getElementById('cta-hint').classList.add('hidden');
 
       log('[DEMO] Simulating UVRK-1 verification...');
       log('[UVRK-1] Calculating Probit Rank...');
