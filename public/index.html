@@ -11,6 +11,7 @@
     :root {
       --neon-cyan: #00f2ff;
       --neon-amber: #ff8c00;
+      --neon-magenta: #ff00ff;
       --bg-dark: #050505;
       --terminal-green: #39ff14;
       --red: #ff3333;
@@ -46,105 +47,133 @@
       width: 100%;
       height: 100%;
       z-index: 0;
-      opacity: 0.15;
+      opacity: 0.25;
     }
     .war-room {
       position: relative;
       z-index: 1;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      grid-template-columns: 180px 1fr 220px;
+      grid-template-columns: 200px 1fr 260px;
       height: 100vh;
       gap: 0;
+      animation: ambientPulse 8s ease-in-out infinite;
+    }
+    @keyframes ambientPulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.03); }
     }
     .ticker-bar {
       grid-column: 1 / -1;
-      background: rgba(0,0,0,0.8);
-      border-bottom: 1px solid rgba(0,242,255,0.3);
-      padding: 0.4rem 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,20,30,0.85) 100%);
+      border-bottom: 2px solid rgba(0,242,255,0.5);
+      padding: 0.6rem 0;
       overflow: hidden;
       white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,242,255,0.1);
     }
     .ticker-content {
       display: inline-block;
       animation: scroll 25s linear infinite;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
       color: var(--neon-cyan);
+      text-shadow: 0 0 10px rgba(0,242,255,0.5);
     }
     @keyframes scroll {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
     .left-rail {
-      border-right: 1px solid rgba(0,242,255,0.2);
-      padding: 0.75rem;
+      border-right: 2px solid rgba(0,242,255,0.4);
+      padding: 1rem;
       overflow-y: auto;
     }
     .left-rail h3 {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
       color: var(--neon-amber);
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 12px rgba(255,140,0,0.4);
     }
     .voices-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 4px;
+      gap: 6px;
     }
     .voice-hex {
       aspect-ratio: 1;
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
       background: #1a1a1a;
-      border: 1px solid #333;
+      border: 2px solid #333;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.5rem;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 800;
       color: #333;
-      transition: all 0.15s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .voice-hex.ping {
+      border-color: rgba(0,242,255,0.8);
+      box-shadow: 0 0 20px rgba(0,242,255,0.5), inset 0 0 15px rgba(0,242,255,0.2);
+      background: linear-gradient(135deg, #0a2a2a 0%, #1a1a1a 100%);
     }
     .voice-hex.active {
       background: var(--neon-cyan);
       color: #000;
-      box-shadow: 0 0 12px var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 25px var(--neon-cyan), 0 0 50px rgba(0,242,255,0.4);
+      animation: hexGlow 0.8s ease-out;
+    }
+    @keyframes hexGlow {
+      0% { transform: scale(1.2); box-shadow: 0 0 40px var(--neon-cyan); }
+      100% { transform: scale(1); }
     }
     .center-panel {
-      padding: 0.75rem;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
       overflow: hidden;
     }
     .input-row {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.75rem;
       align-items: center;
     }
-    .input-row .prompt { color: var(--neon-cyan); font-size: 0.9rem; }
+    .input-row .prompt { color: var(--neon-cyan); font-size: 1.4rem; text-shadow: 0 0 10px var(--neon-cyan); }
     .input-row input {
       flex: 1;
-      background: transparent;
-      border: 1px solid rgba(0,242,255,0.3);
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(0,242,255,0.4);
       color: #fff;
       font-family: inherit;
-      font-size: 0.85rem;
-      padding: 0.4rem 0.6rem;
+      font-size: 1.15rem;
+      padding: 0.65rem 1rem;
+      transition: all 0.3s ease;
     }
-    .input-row input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,242,255,0.2); }
+    .input-row input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0,242,255,0.4); }
     .input-row button {
-      background: var(--neon-cyan);
+      background: linear-gradient(135deg, var(--neon-cyan) 0%, #00c4cc 100%);
       color: #000;
       border: none;
-      padding: 0.5rem 1rem;
+      padding: 0.7rem 1.5rem;
       font-family: inherit;
-      font-weight: 700;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
       cursor: pointer;
+      transition: all 0.3s ease;
     }
-    .input-row button:hover { box-shadow: 0 0 20px var(--neon-cyan); }
+    .input-row button:hover { box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,242,255,0.3); transform: scale(1.02); }
+    .demo-btn {
+      background: linear-gradient(135deg, var(--neon-amber) 0%, #ff6600 100%) !important;
+      color: #000 !important;
+    }
+    .demo-btn:hover { box-shadow: 0 0 25px var(--neon-amber), 0 0 50px rgba(255,140,0,0.4) !important; }
     .sigma-board {
       flex: 1;
       display: flex;
@@ -154,56 +183,62 @@
       min-height: 0;
     }
     .sigma-pulse {
-      font-size: clamp(4rem, 12vw, 10rem);
+      font-size: clamp(5rem, 18vw, 14rem);
       font-weight: 900;
-      letter-spacing: -0.05em;
+      letter-spacing: -0.04em;
       color: var(--neon-cyan);
-      text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+      text-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan), 0 0 90px rgba(0,242,255,0.5);
       animation: sigmaPulse 1.5s ease-in-out infinite alternate;
     }
     @keyframes sigmaPulse {
-      from { opacity: 0.85; }
-      to { opacity: 1; text-shadow: 0 0 30px var(--neon-cyan), 0 0 60px var(--neon-cyan); }
+      from { opacity: 0.9; text-shadow: 0 0 25px var(--neon-cyan), 0 0 50px var(--neon-cyan); }
+      to { opacity: 1; text-shadow: 0 0 40px var(--neon-cyan), 0 0 80px var(--neon-cyan), 0 0 120px rgba(0,242,255,0.6); }
     }
     .sigma-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      color: rgba(0,242,255,0.7);
-      margin-top: 0.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      color: rgba(0,242,255,0.9);
+      margin-top: 0.5rem;
+      text-shadow: 0 0 15px rgba(0,242,255,0.4);
     }
     .metrics-row {
       display: flex;
-      gap: 1.5rem;
+      gap: 2rem;
       flex-wrap: wrap;
-      font-size: 0.7rem;
-      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
     }
-    .metrics-row span { color: rgba(0,242,255,0.8); }
+    .metrics-row span { color: rgba(0,242,255,0.95); text-shadow: 0 0 8px rgba(0,242,255,0.3); }
     .right-rail {
-      border-left: 1px solid rgba(0,242,255,0.2);
-      padding: 0.5rem;
+      border-left: 2px solid rgba(0,242,255,0.4);
+      padding: 1rem;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
     .right-rail h3 {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
       color: var(--neon-amber);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      text-shadow: 0 0 12px rgba(255,140,0,0.4);
     }
     .log-window {
       flex: 1;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(0,242,255,0.15);
-      font-size: 0.6rem;
-      padding: 0.5rem;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid rgba(0,242,255,0.25);
+      font-size: 0.95rem;
+      padding: 0.75rem;
       overflow-y: auto;
       font-family: 'JetBrains Mono', monospace;
     }
     .log-line {
-      color: rgba(0,242,255,0.7);
-      margin-bottom: 0.2rem;
+      color: rgba(0,242,255,0.85);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
     }
     .log-line.ok { color: var(--terminal-green); }
     .log-line.err { color: var(--red); }
@@ -212,22 +247,23 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.4rem 1rem;
-      background: rgba(0,0,0,0.9);
-      border-top: 1px solid rgba(0,242,255,0.2);
-      font-size: 0.7rem;
+      padding: 0.65rem 1.25rem;
+      background: rgba(0,0,0,0.92);
+      border-top: 2px solid rgba(0,242,255,0.4);
+      font-size: 1rem;
+      font-weight: 600;
     }
     .regime-indicator {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.65rem;
     }
     .regime-dot {
-      width: 10px;
-      height: 10px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--terminal-green);
-      box-shadow: 0 0 10px var(--terminal-green);
+      box-shadow: 0 0 15px var(--terminal-green), 0 0 25px rgba(57,255,20,0.5);
     }
     .regime-dot.tail {
       background: var(--red);
@@ -235,6 +271,69 @@
       animation: blink 0.5s infinite;
     }
     @keyframes blink { 50% { opacity: 0.5; } }
+
+    /* Emergency Regime State — Blood Neon */
+    .regime-tail-event {
+      --neon-cyan: #ff003c;
+      --neon-amber: #ff0000;
+      background-color: #1a0000 !important;
+      transition: all 0.5s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+    }
+    .regime-tail-event .scanline-overlay {
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 0, 0, 0.1),
+        rgba(255, 0, 0, 0.1) 10px,
+        rgba(0, 0, 0, 0.2) 10px,
+        rgba(0, 0, 0, 0.2) 20px
+      );
+      background-size: 40px 40px;
+      animation: hazard-stripe 2s linear infinite;
+    }
+    @keyframes hazard-stripe {
+      from { background-position: 0 0; }
+      to { background-position: 40px 40px; }
+    }
+    .tail-warning-text {
+      color: #ff003c;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5rem;
+      animation: blinker 0.2s steps(2, start) infinite;
+    }
+    @keyframes blinker {
+      to { visibility: hidden; }
+    }
+    .regime-tail-event .voice-hex.active {
+      background: #ff003c;
+      color: #000;
+      box-shadow: 0 0 12px #ff003c;
+    }
+    .regime-tail-event .sigma-pulse {
+      color: #ff003c;
+      text-shadow: 0 0 20px #ff003c, 0 0 40px #ff003c;
+    }
+    .regime-tail-event .ticker-content,
+    .regime-tail-event .left-rail h3,
+    .regime-tail-event .right-rail h3,
+    .regime-tail-event .log-line { color: rgba(255, 0, 60, 0.9); }
+    .regime-tail-event .log-line.ok { color: #ff003c; }
+    .regime-tail-event .footer-bar { border-top-color: rgba(255, 0, 60, 0.5); }
+    .regime-tail-event #canvas-bg { opacity: 0.08; }
+    .tail-warning-overlay {
+      display: none;
+      position: fixed;
+      bottom: 3rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 150;
+      pointer-events: none;
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+    .regime-tail-event .tail-warning-overlay { display: block; }
+
     @keyframes glitch {
       0% { filter: none; }
       25% { filter: hue-rotate(90deg) contrast(1.2); transform: translate(-2px, 0); }
@@ -242,7 +341,7 @@
       75% { filter: hue-rotate(90deg) contrast(1.2); transform: translate(-1px, 0); }
       100% { filter: none; transform: translate(0, 0); }
     }
-    .footer-bar .url { color: rgba(0,242,255,0.8); }
+    .footer-bar .url { color: rgba(0,242,255,0.9); font-size: 1rem; }
     .api-modal {
       display: none;
       position: fixed;
@@ -289,7 +388,7 @@
     <div class="left-rail">
       <h3>33 VOICES</h3>
       <div class="voices-grid" id="voices-grid"></div>
-      <div style="margin-top:0.5rem;font-size:0.6rem;color:rgba(0,242,255,0.6)" id="voices-status">Awaiting signature</div>
+      <div style="margin-top:0.75rem;font-size:1rem;font-weight:600;color:rgba(0,242,255,0.9)" id="voices-status">Awaiting signature</div>
     </div>
 
     <div class="center-panel">
@@ -297,6 +396,7 @@
         <span class="prompt">⟩</span>
         <input type="text" id="address" placeholder="bc1q... or 0x..." autocomplete="off">
         <button id="verify-btn" onclick="verify()">VERIFY</button>
+        <button id="demo-btn" onclick="runDemo()" class="demo-btn">DEMO</button>
       </div>
       <div class="sigma-board">
         <div class="sigma-pulse" id="sigma-display">—</div>
@@ -321,8 +421,12 @@
       </div>
       <span class="url">crypto-verification.vercel.app</span>
       <a href="/olympic-report.html" target="_blank" style="color:var(--neon-cyan)">REPORT</a>
-      <button onclick="showApiModal()" style="background:transparent;border:1px solid var(--neon-cyan);color:var(--neon-cyan);padding:0.3rem 0.6rem;font-family:inherit;cursor:pointer;font-size:0.65rem">API</button>
+      <button onclick="showApiModal()" style="background:transparent;border:2px solid var(--neon-cyan);color:var(--neon-cyan);padding:0.5rem 1rem;font-family:inherit;cursor:pointer;font-size:0.95rem;font-weight:700">API</button>
     </div>
+  </div>
+
+  <div class="tail-warning-overlay" id="tail-warning-overlay">
+    <span class="tail-warning-text">LOW CONFIDENCE — TAIL REGIME DETECTED</span>
   </div>
 
   <div class="api-modal" id="api-modal">
@@ -401,12 +505,14 @@
     async function verify() {
       const addr = addressEl.value.trim();
       if (!addr) return;
+      stopIdleDemo();
       btn.disabled = true;
       resetVoices();
       sigmaDisplay.textContent = '…';
       volDisplay.textContent = 'VOL: —';
       confDisplay.textContent = 'CONF: —';
       voicesStatus.textContent = 'Harmonizing deterministic input...';
+      document.body.classList.remove('regime-tail-event');
 
       log('[UVRK-1] Calculating Probit Rank...');
       log('[VOICES] Harmonizing deterministic input...');
@@ -426,10 +532,11 @@
 
           animateVoices(true);
 
-          const perf = data.outperformance_vs_stoch_vol_levy || '';
-          const isTail = perf.startsWith('-') || (parseFloat(perf) < 0);
+          const vol = parseFloat(data.volatility) || 0;
+          const isTail = vol > 0.85 || (data.regime === 'tail') || (data.is_tail === true);
           regimeDot.className = 'regime-dot' + (isTail ? ' tail' : '');
           regimeText.textContent = isTail ? 'TAIL EVENT' : 'NORMAL';
+          document.body.classList.toggle('regime-tail-event', isTail);
         } else {
           log('[ERROR] ' + (data.error || 'Unknown'), 'err');
           sigmaDisplay.textContent = 'ERR';
@@ -441,6 +548,8 @@
         resetVoices();
       }
       btn.disabled = false;
+      idleDemoActive = true;
+      startIdleDemo();
     }
 
     addressEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -460,21 +569,23 @@
     function resize() {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
-      cols = Math.floor(w / 20);
+      cols = Math.floor(w / 22);
       ypos = Array(cols).fill(0);
     }
 
     function drawRain() {
-      ctx.fillStyle = 'rgba(5,5,5,0.05)';
+      const isTail = document.body.classList.contains('regime-tail-event');
+      ctx.fillStyle = isTail ? 'rgba(26,0,0,0.04)' : 'rgba(5,5,5,0.04)';
       ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = 'rgba(0,242,255,0.3)';
-      ctx.font = '14px JetBrains Mono';
+      ctx.font = '18px JetBrains Mono';
       for (let i = 0; i < cols; i++) {
-        const char = String.fromCharCode(0x30A0 + Math.random() * 96);
-        const x = i * 20;
+        const char = String.fromCharCode(0x30A0 + Math.floor(Math.random() * 64));
+        const x = i * 22;
+        const alpha = 0.15 + Math.random() * 0.25;
+        ctx.fillStyle = isTail ? `rgba(255,0,60,${alpha})` : `rgba(0,242,255,${alpha})`;
         ctx.fillText(char, x, ypos[i]);
-        if (ypos[i] > h && Math.random() > 0.975) ypos[i] = 0;
-        else ypos[i] += 20;
+        if (ypos[i] > h && Math.random() > 0.97) ypos[i] = 0;
+        else ypos[i] += 22;
       }
     }
 
@@ -482,9 +593,67 @@
     window.addEventListener('resize', resize);
     setInterval(drawRain, 50);
 
+    let idleDemoActive = true;
+    let demoInterval;
+
+    function startIdleDemo() {
+      if (demoInterval) return;
+      demoInterval = setInterval(() => {
+        if (!idleDemoActive) return;
+        const hexes = document.querySelectorAll('.voice-hex:not(.active)');
+        if (hexes.length === 0) return;
+        const randomHex = hexes[Math.floor(Math.random() * hexes.length)];
+        randomHex.classList.add('ping');
+        setTimeout(() => randomHex.classList.remove('ping'), 400);
+      }, 800);
+    }
+
+    function stopIdleDemo() {
+      idleDemoActive = false;
+      if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
+      document.querySelectorAll('.voice-hex.ping').forEach(h => h.classList.remove('ping'));
+    }
+
+    async function runDemo() {
+      stopIdleDemo();
+      btn.disabled = true;
+      document.getElementById('demo-btn').disabled = true;
+      resetVoices();
+      sigmaDisplay.textContent = '…';
+      volDisplay.textContent = 'VOL: —';
+      confDisplay.textContent = 'CONF: —';
+      voicesStatus.textContent = 'Harmonizing deterministic input...';
+      document.body.classList.remove('regime-tail-event');
+
+      log('[DEMO] Simulating UVRK-1 verification...');
+      log('[UVRK-1] Calculating Probit Rank...');
+      log('[VOICES] Harmonizing deterministic input...');
+
+      await new Promise(r => setTimeout(r, 600));
+
+      sigmaDisplay.textContent = '+8.71σ';
+      volDisplay.textContent = 'VOL: 0.42';
+      confDisplay.textContent = 'CONF: 99.2%';
+      log('[UVRK-1] Probit Rank OK', 'ok');
+      log('[VOICES] Hash Collision Check: 0.00000... OK', 'ok');
+      log('[SYSTEM] DEMO VERIFICATION SUCCESS', 'ok');
+
+      animateVoices(true);
+
+      regimeDot.className = 'regime-dot';
+      regimeText.textContent = 'NORMAL';
+
+      await new Promise(r => setTimeout(r, 2000));
+      idleDemoActive = true;
+      startIdleDemo();
+      btn.disabled = false;
+      document.getElementById('demo-btn').disabled = false;
+    }
+
     initVoicesGrid();
     log('[SYSTEM] UVRK-1 Terminal online');
     log('[VOICES] 33/33 Ready');
+    startIdleDemo();
   </script>
 </body>
 </html>

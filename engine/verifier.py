@@ -146,6 +146,7 @@ class CryptoVerifier:
             verified = self.thirty_three_verify(address)
 
             outperf_str = f"{outperformance:+.2f}σ" if outperformance is not None else "N/A (no benchmark)"
+            is_tail = vol > 0.85  # Z-score proxy: top 10% volatility = tail regime
             return {
                 'address': address[:12] + '...' if len(address) > 12 else address,
                 'volatility': round(vol, 4),
@@ -154,7 +155,9 @@ class CryptoVerifier:
                 'r_squared': 0.954,
                 'verified': verified['passed'],
                 'method': verified.get('method', '33_voices'),
-                'status': 'success'
+                'status': 'success',
+                'regime': 'tail' if is_tail else 'normal',
+                'is_tail': is_tail,
             }
         except Exception as e:
             return {
