@@ -89,7 +89,14 @@ def _uvrk_predict(vols, i, window=60, prices=None, vol_window=20):
     theta = THETA_TAIL if regime_info['is_tail'] else THETA_NORMAL
     kappa = KAPPA_TAIL if regime_info['is_tail'] else KAPPA_NORMAL
 
-    pred = theta * v_t + (1 - theta) * vol_mean + kappa * vol_std * probit(rank)
+    if abs(rank - 0.5) > 0.35:
+        kappa *= 2.0
+
+    inv_norm = probit(rank)
+    pred = theta * v_t + (1 - theta) * vol_mean + kappa * vol_std * inv_norm
+
+    if abs(inv_norm) > 2.3 and regime_info['is_tail']:
+        pred += 0.08 * abs(inv_norm)
 
     # Jump component in tail regime
     if regime_info['is_tail'] and prices and len(prices) >= 15:

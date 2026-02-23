@@ -71,7 +71,34 @@
       overflow: hidden;
       white-space: nowrap;
       box-shadow: 0 4px 20px rgba(0,242,255,0.1);
+      position: relative;
     }
+    .ramanash-badge {
+      position: absolute;
+      top: 0.25rem;
+      right: 1rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: var(--neon-amber);
+      text-shadow: 0 0 8px rgba(255,140,0,0.6);
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; text-shadow: 0 0 12px rgba(255,140,0,0.8); }
+    }
+    .btc-live {
+      position: absolute;
+      top: 0.25rem;
+      left: 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .btc-live:hover { text-shadow: 0 0 8px var(--neon-cyan); }
     .ticker-content {
       display: inline-block;
       animation: scroll 25s linear infinite;
@@ -373,6 +400,28 @@
       100% { filter: none; transform: translate(0, 0); }
     }
     .footer-bar .url { color: rgba(0,242,255,0.9); font-size: 1rem; }
+    .big-short-meter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+    }
+    .meter-label { color: var(--neon-amber); letter-spacing: 0.1em; }
+    .meter-bar {
+      width: 60px;
+      height: 6px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(0,242,255,0.3);
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-amber));
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .meter-fill.crisis { background: var(--red); }
+    .meter-value { color: rgba(0,242,255,0.9); font-weight: 700; min-width: 3ch; }
     .api-modal {
       display: none;
       position: fixed;
@@ -410,6 +459,8 @@
 
   <div class="war-room">
     <div class="ticker-bar">
+      <div class="ramanash-badge">RAMANASH-ORACLE LIVE</div>
+      <a href="https://www.tradingview.com/symbols/BTCUSD/" target="_blank" rel="noopener" class="btc-live">BTC LIVE ↗</a>
       <div class="ticker-content">
         UVRK-1 LIVE | BTC: +8.71σ | ETH: +6.23σ | SOL: +4.12σ | 33 VOICES: 0 COLLISIONS | R²: 0.963 | TAIL REGIME: 65% | OLYMPIC: 8/8 PASSED |
         UVRK-1 LIVE | BTC: +8.71σ | ETH: +6.23σ | SOL: +4.12σ | 33 VOICES: 0 COLLISIONS | R²: 0.963 | TAIL REGIME: 65% | OLYMPIC: 8/8 PASSED |
@@ -450,6 +501,11 @@
       <div class="regime-indicator">
         <div class="regime-dot" id="regime-dot"></div>
         <span id="regime-text">NORMAL</span>
+      </div>
+      <div class="big-short-meter" id="big-short-meter">
+        <span class="meter-label">BIG SHORT</span>
+        <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+        <span class="meter-value" id="meter-value">—</span>
       </div>
       <span class="url">crypto-verification.vercel.app</span>
       <a href="/olympic-report.html" target="_blank" style="color:var(--neon-cyan)">REPORT</a>
@@ -547,6 +603,9 @@
       voicesStatus.textContent = 'Harmonizing deterministic input...';
       document.body.classList.remove('regime-tail-event');
       document.getElementById('cta-hint').classList.add('hidden');
+      document.getElementById('meter-fill').style.width = '0%';
+      document.getElementById('meter-fill').classList.remove('crisis');
+      document.getElementById('meter-value').textContent = '—';
 
       log('[UVRK-1] Calculating Probit Rank...');
       log('[VOICES] Harmonizing deterministic input...');
@@ -564,6 +623,13 @@
           sigmaDisplay.classList.remove('idle');
           volDisplay.textContent = 'VOL: ' + data.volatility;
           confDisplay.textContent = 'CONF: ' + (data.confidence * 100).toFixed(1) + '%';
+
+          if (data.nash_confidence != null) {
+            const pct = Math.round(data.nash_confidence * 100);
+            document.getElementById('meter-fill').style.width = pct + '%';
+            document.getElementById('meter-fill').classList.toggle('crisis', data.big_short_signal === 'CRISIS BREWING');
+            document.getElementById('meter-value').textContent = pct + '%';
+          }
 
           animateVoices(true);
 
@@ -668,6 +734,9 @@
       voicesStatus.textContent = 'Harmonizing deterministic input...';
       document.body.classList.remove('regime-tail-event');
       document.getElementById('cta-hint').classList.add('hidden');
+      document.getElementById('meter-fill').style.width = '0%';
+      document.getElementById('meter-fill').classList.remove('crisis');
+      document.getElementById('meter-value').textContent = '—';
 
       log('[DEMO] Simulating UVRK-1 verification...');
       log('[UVRK-1] Calculating Probit Rank...');
@@ -676,10 +745,15 @@
       await new Promise(r => setTimeout(r, 600));
 
       sigmaDisplay.textContent = '+8.71σ';
+      sigmaDisplay.classList.remove('idle');
       volDisplay.textContent = 'VOL: 0.42';
       confDisplay.textContent = 'CONF: 99.2%';
+      document.getElementById('meter-fill').style.width = '86%';
+      document.getElementById('meter-fill').classList.add('crisis');
+      document.getElementById('meter-value').textContent = '86%';
       log('[UVRK-1] Probit Rank OK', 'ok');
       log('[VOICES] Hash Collision Check: 0.00000... OK', 'ok');
+      log('[RAMANASH] Nash eq -0.36 · CRISIS BREWING', 'ok');
       log('[SYSTEM] DEMO VERIFICATION SUCCESS', 'ok');
 
       animateVoices(true);

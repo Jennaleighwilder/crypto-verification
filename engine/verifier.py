@@ -36,6 +36,13 @@ try:
 except ImportError:
     VOICES_33_AVAILABLE = False
 
+# Try to import RAMANASH-ORACLE
+try:
+    from ramanash_kernel import predict_macro, MACRO_FEB_23_2026
+    RAMANASH_AVAILABLE = True
+except ImportError:
+    RAMANASH_AVAILABLE = False
+
 
 class CryptoVerifier:
     def __init__(self):
@@ -99,8 +106,8 @@ class CryptoVerifier:
             return False, "invalid address format"
         return True, None
 
-    def verify_address(self, address: str) -> dict:
-        """Full verification pipeline"""
+    def verify_address(self, address: str, macro_factors: dict = None) -> dict:
+        """Full verification pipeline. Optional macro_factors for RAMANASH-ORACLE."""
         if address is None:
             return {'address': 'unknown', 'error': 'address is required', 'status': 'error'}
         address = str(address)
@@ -147,7 +154,7 @@ class CryptoVerifier:
 
             outperf_str = f"{outperformance:+.2f}σ" if outperformance is not None else "N/A (no benchmark)"
             is_tail = vol > 0.85  # Z-score proxy: top 10% volatility = tail regime
-            return {
+            result = {
                 'address': address[:12] + '...' if len(address) > 12 else address,
                 'volatility': round(vol, 4),
                 'confidence': verified['confidence'],
@@ -159,6 +166,12 @@ class CryptoVerifier:
                 'regime': 'tail' if is_tail else 'normal',
                 'is_tail': is_tail,
             }
+            if RAMANASH_AVAILABLE and macro_factors:
+                ramanash = predict_macro(vol, macro_factors, rank=0.5 + (0.1 if is_tail else 0))
+                result['ramanash_vol'] = round(ramanash['ramanash_vol'], 4)
+                result['big_short_signal'] = ramanash['big_short_signal']
+                result['nash_confidence'] = round(ramanash['nash_confidence'], 3)
+            return result
         except Exception as e:
             return {
                 'address': address[:12] + '...' if address else 'unknown',

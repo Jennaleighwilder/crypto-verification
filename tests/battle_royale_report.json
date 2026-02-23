@@ -1,0 +1,41 @@
+{
+  "scenarios": {
+    "2022_FTX_LUNA": {
+      "win_rate": 0.171,
+      "p_value": 1.0,
+      "pre_crash_signal": 0.4221,
+      "max_dd": -72.52
+    },
+    "2020_COVID": {
+      "win_rate": 0.1061,
+      "p_value": 1.0,
+      "pre_crash_signal": 0,
+      "max_dd": -70.45
+    },
+    "2018_Crypto_Winter": {
+      "win_rate": 0.1968,
+      "p_value": 1.0,
+      "pre_crash_signal": 0.5303,
+      "max_dd": -69.52
+    },
+    "Single_Day_Flash_Crash": {
+      "win_rate": 0.1436,
+      "p_value": 1.0,
+      "pre_crash_signal": 0.3662,
+      "max_dd": -50.98
+    },
+    "Triple_Black_Swan_Combo": {
+      "win_rate": 0.1772,
+      "p_value": 1.0,
+      "pre_crash_signal": 0.4416,
+      "max_dd": -69.32
+    }
+  },
+  "ramanash_tariff_day": {
+    "base_uvrk_vol": 0.4214,
+    "ramanash_vol": 0.5624,
+    "big_short_signal": "CRISIS BREWING",
+    "nash_confidence": 0.858,
+    "nash_eq": -0.36
+  }
+}

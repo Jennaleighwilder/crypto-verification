@@ -11,9 +11,19 @@ from pathlib import Path
 _root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_root))
 
+import logging
 from flask import Flask, jsonify, request, send_from_directory
 
 from engine.verifier import verifier
+
+logger = logging.getLogger(__name__)
+
+try:
+    from engine.ramanash_kernel import MACRO_FEB_23_2026
+    RAMANASH_AVAILABLE = True
+except ImportError:
+    MACRO_FEB_23_2026 = None
+    RAMANASH_AVAILABLE = False
 
 app = Flask(__name__, static_folder=_root / 'public', static_url_path='')
 
@@ -33,20 +43,26 @@ def health():
 def verify():
     if request.method == "GET":
         address = request.args.get("address")
+        macro_factors = None
     else:
         data = request.get_json(silent=True)
         address = data.get("address") if data else None
+        macro_factors = data.get("macro_factors") if data else None
 
     if not address:
         return jsonify({
             "error": "Missing address parameter",
-            "usage": "GET /api/verify?address=bc1q... or POST {\"address\": \"...\"}"
+            "usage": "GET /api/verify?address=bc1q... or POST {\"address\": \"...\", \"macro_factors\": {...}}"
         }), 400
 
     if len(str(address)) > 1000:
         return jsonify({"error": "Address too long"}), 400
 
-    result = verifier.verify_address(address)
+    if macro_factors is None and RAMANASH_AVAILABLE:
+        macro_factors = MACRO_FEB_23_2026
+        logger.info("[AUTO-MACRO] Using MACRO_FEB_23_2026")
+
+    result = verifier.verify_address(address, macro_factors=macro_factors)
     return jsonify(result)
 
 

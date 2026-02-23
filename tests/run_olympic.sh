@@ -31,4 +31,7 @@ python tests/olympic_performance_load.py
 echo -e "\n8. Tail Performance Test"
 python tests/olympic_tail_performance.py
 
+echo -e "\n9. Tariff Whiplash (RAMANASH)"
+python tests/olympic_tariff_whiplash.py
+
 echo -e "\n🏅 OLYMPIC VALIDATION COMPLETE"
