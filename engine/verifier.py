@@ -171,6 +171,7 @@ class CryptoVerifier:
                 result['ramanash_vol'] = round(ramanash['ramanash_vol'], 4)
                 result['big_short_signal'] = ramanash['big_short_signal']
                 result['nash_confidence'] = round(ramanash['nash_confidence'], 3)
+                result['nash_score'] = round(ramanash.get('nash_score', ramanash['nash_confidence']), 3)
             return result
         except Exception as e:
             return {

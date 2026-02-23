@@ -31,13 +31,20 @@ TEST_VECTORS = [
 
 
 def check_health() -> bool:
-    """Verify API is reachable."""
-    try:
-        r = requests.get(f"{API_URL}/api/health", timeout=10)
-        return r.status_code == 200 and r.json().get("status") == "healthy"
-    except Exception as e:
-        print(f"❌ Health check failed: {e}")
-        return False
+    """Verify API is reachable. Retry up to 3 times for transient failures."""
+    for attempt in range(3):
+        try:
+            r = requests.get(f"{API_URL}/api/health", timeout=15)
+            data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
+            if r.status_code == 200 and data.get("status") == "healthy":
+                return True
+            print(f"❌ Health check attempt {attempt + 1}: status={r.status_code}, body={r.text[:200]}")
+        except Exception as e:
+            print(f"❌ Health check attempt {attempt + 1} failed: {e}")
+        if attempt < 2:
+            import time
+            time.sleep(2)
+    return False
 
 
 def check_verify_consistency() -> tuple[int, int]:
@@ -47,11 +54,13 @@ def check_verify_consistency() -> tuple[int, int]:
     for addr in TEST_VECTORS:
         try:
             r = requests.get(f"{API_URL}/api/verify", params={"address": addr}, timeout=15)
-            data = r.json()
+            data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
             if data.get("status") == "success" and "volatility" in data:
                 wins += 1
-        except Exception:
-            pass
+            elif r.status_code != 200:
+                print(f"  ⚠️ {addr[:12]}...: status={r.status_code}")
+        except Exception as e:
+            print(f"  ⚠️ {addr[:12]}...: {e}")
     return wins, total
 
 

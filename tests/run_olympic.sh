@@ -34,4 +34,13 @@ python tests/olympic_tail_performance.py
 echo -e "\n9. Tariff Whiplash (RAMANASH)"
 python tests/olympic_tariff_whiplash.py
 
+echo -e "\n10. Bias Stress (Purged Walk-Forward, Rolling A/B, Time-Shift)"
+python tests/olympic_bias_stress.py
+
+echo -e "\n11. Nash Calibration"
+python tests/olympic_nash_calibration.py
+
+echo -e "\n12. Macro Sensitivity (Monotonicity)"
+python tests/olympic_macro_sensitivity.py
+
 echo -e "\n🏅 OLYMPIC VALIDATION COMPLETE"

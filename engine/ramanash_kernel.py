@@ -1,13 +1,20 @@
 """
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║              RAMANASH-ORACLE — UVRK-2 with Nash + Ramanujan                   ║
+║              RAMANASH-ORACLE — UVRK-2 with Ramanujan hyper-kernel             ║
 ║                                                                               ║
 ║  "The Big Moneyball Short" — Macro-interlocked volatility oracle              ║
-║  Nash equilibrium (Beautiful Mind) + Ramanujan hyper-kernel (mock-theta)      ║
+║  RAMANASH composite index (macro stress) + Ramanujan probit (mock-theta)      ║
 ║                                                                               ║
 ║  © 2025 Jennifer Leigh West • The Forgotten Code Research Institute           ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 """
+
+# Threshold provenance: frozen 2025-02-23, not tuned on data. See docs/MACRO_WEIGHTING_AUDIT.md
+THRESHOLD_CRISIS = -0.35
+THRESHOLD_STEADY = 0.35
+THRESHOLD_SHOCK_HIGH = -0.38
+THRESHOLD_SHOCK_MID = -0.35
+THRESHOLD_SHOCK_LOW = -0.30
 
 import math
 from typing import Dict, Any, Optional
@@ -38,8 +45,8 @@ def predict_macro(
     rank: float = 0.5,
 ) -> Dict[str, Any]:
     """
-    Full macro interlock: media + society + demographics + war + materials.
-    Nash equilibrium: volatility as game outcome between agents.
+    RAMANASH composite index: media + spending + war + materials.
+    Macro stress index (not game-theoretic equilibrium) — volatility adjustment.
     """
     sentiment = macro_factors.get("media_sentiment", 0.5)
     spending_pressure = macro_factors.get("spending_habits", 0.5)
@@ -50,11 +57,11 @@ def predict_macro(
         sentiment * geo_risk + (1 - spending_pressure) * materials
     ) * nash_strength
     if nash_eq < 0:
-        if nash_eq < -0.38:
+        if nash_eq < THRESHOLD_SHOCK_HIGH:
             shock_coef = 0.75
-        elif nash_eq < -0.35 and geo_risk > 0.7:
+        elif nash_eq < THRESHOLD_SHOCK_MID and geo_risk > 0.7:
             shock_coef = 0.72
-        elif nash_eq < -0.3:
+        elif nash_eq < THRESHOLD_SHOCK_LOW:
             shock_coef = 0.65
         else:
             shock_coef = 0.5
@@ -71,20 +78,22 @@ def predict_macro(
     if spending_pressure < 0.45:
         adjusted *= 1.06
 
-    if nash_eq < -0.35:
+    if nash_eq < THRESHOLD_CRISIS:
         big_short = "CRISIS BREWING"
-    elif nash_eq > 0.35:
+    elif nash_eq > THRESHOLD_STEADY:
         big_short = "STEADY"
     else:
         big_short = "NEUTRAL"
 
-    nash_confidence = 0.70 + 0.30 * abs(nash_eq)
+    # Nash score: 0.70 + 0.30*|nash_eq|. Not calibrated; use "score" for institutional clarity.
+    nash_score = 0.70 + 0.30 * abs(nash_eq)
     if geo_risk >= 0.75:
-        nash_confidence = min(0.99, nash_confidence + 0.05)
+        nash_score = min(0.99, nash_score + 0.05)
 
     return {
         "ramanash_vol": max(0.001, adjusted),
-        "nash_confidence": nash_confidence,
+        "nash_confidence": nash_score,  # backward compat; prefer nash_score
+        "nash_score": nash_score,
         "big_short_signal": big_short,
         "nash_eq": nash_eq,
         "macro_factors": macro_factors,
