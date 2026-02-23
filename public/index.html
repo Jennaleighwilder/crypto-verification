@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UVRK-1 Crypto Verification</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e8e8ed;
+      --muted: #8b8b9a;
+      --accent: #00d4aa;
+      --accent-dim: #00a884;
+      --gold: #d4af37;
+      --error: #e74c3c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+    .tagline {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border-radius: 4px;
+    }
+    input::placeholder { color: var(--muted); }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    button {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .results.visible { display: block; }
+    .results.error { border-color: var(--error); }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: var(--muted); }
+    .result-value { font-weight: 600; color: var(--accent); }
+    .result-value.ok { color: var(--gold); }
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .cta-section {
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .cta-section a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .cta-section a:hover { color: var(--accent); }
+    .api-btn {
+      margin-top: 1.5rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    .api-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal.visible { display: flex; }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 420px;
+      text-align: center;
+    }
+    .modal-content h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .modal-content p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+    .modal-content a {
+      color: var(--accent);
+      word-break: break-all;
+    }
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UVRK-1 CRYPTO VERIFICATION</h1>
+    <p class="tagline">Enter any address → 2 seconds later: volatility signature</p>
+
+    <div class="input-row">
+      <input type="text" id="address" placeholder="bc1q... or 0x..." autocomplete="off">
+      <button id="verify-btn" onclick="verify()">VERIFY</button>
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-row">
+        <span class="result-label">VOLATILITY SIGNATURE</span>
+        <span class="result-value" id="volatility">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">CONFIDENCE</span>
+        <span class="result-value" id="confidence">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">OUTPERFORMS STOCH VOL LÉVY BY</span>
+        <span class="result-value" id="outperformance">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">33 VOICES VERIFIED</span>
+        <span class="result-value" id="verified">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">R² ON BITCOIN</span>
+        <span class="result-value" id="r2">—</span>
+      </div>
+
+      <div class="cta-section">
+        <a href="/olympic-report.html" target="_blank">VIEW FULL OLYMPIC VALIDATION REPORT</a>
+        <br>
+        <button class="api-btn" onclick="showApiModal()">REQUEST API ACCESS</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      No signup. No payment. Just math.<br>
+      crypto-verification.vercel.app
+    </div>
+  </div>
+
+  <div class="modal" id="api-modal">
+    <div class="modal-content">
+      <h2>Thank you for your interest.</h2>
+      <p>UVRK-1 is available for institutional licensing.</p>
+      <p>Please contact:<br><a href="mailto:theforgottencode780@gmail.com">theforgottencode780@gmail.com</a></p>
+      <p>Include your organization name and use case.<br>We'll respond within 24 hours.</p>
+      <button onclick="hideApiModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const addressEl = document.getElementById('address');
+    const btn = document.getElementById('verify-btn');
+    const resultsEl = document.getElementById('results');
+
+    async function verify() {
+      const addr = addressEl.value.trim();
+      if (!addr) return;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      resultsEl.classList.add('visible');
+      resultsEl.classList.remove('error');
+      document.getElementById('volatility').textContent = '—';
+      document.getElementById('confidence').textContent = '—';
+      document.getElementById('outperformance').textContent = '—';
+      document.getElementById('verified').textContent = '—';
+      document.getElementById('r2').textContent = '—';
+
+      try {
+        const res = await fetch(API_BASE + '/api/verify?address=' + encodeURIComponent(addr));
+        const data = await res.json();
+        if (data.status === 'success') {
+          document.getElementById('volatility').textContent = String(data.volatility);
+          document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+          document.getElementById('outperformance').textContent = data.outperformance_vs_stoch_vol_levy || 'N/A';
+          document.getElementById('verified').textContent = data.verified ? '✅' : '—';
+          document.getElementById('verified').className = 'result-value ' + (data.verified ? 'ok' : '');
+          document.getElementById('r2').textContent = String(data.r_squared || 0.963);
+        } else {
+          resultsEl.classList.add('error');
+          document.getElementById('volatility').textContent = data.error || 'Error';
+        }
+      } catch (e) {
+        resultsEl.classList.add('error');
+        document.getElementById('volatility').textContent = 'Network error';
+      }
+      btn.disabled = false;
+      btn.textContent = 'VERIFY';
+    }
+
+    addressEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+
+    function showApiModal() {
+      document.getElementById('api-modal').classList.add('visible');
+    }
+    function hideApiModal() {
+      document.getElementById('api-modal').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>

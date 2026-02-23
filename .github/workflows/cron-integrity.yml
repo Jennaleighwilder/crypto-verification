@@ -1,0 +1,25 @@
+name: Model Integrity Watchdog
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: pip install requests scipy
+
+      - name: Run Drift Monitor
+        env:
+          PROD_URL: "https://crypto-verification.vercel.app"
+        run: python scripts/drift_monitor.py
